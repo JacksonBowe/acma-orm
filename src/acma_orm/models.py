@@ -165,7 +165,7 @@ class Bsl(BaseModel):
 class Licence(BaseModel):
     licence_no = CharField(primary_key=True)  # LICENCE_NO
     # CLIENT_NO references client.csv (defined in Client below)
-    client_no = ForeignKeyField(
+    client = ForeignKeyField(
         Client,
         field="client_no",
         column_name="client_no",
@@ -204,7 +204,7 @@ class Licence(BaseModel):
     ap_prj_ident = CharField(null=True)
     ship_name = CharField(null=True)
     # BSL_NO references bsl.csv (see Bsl below)
-    bsl_no = ForeignKeyField(
+    bsl = ForeignKeyField(
         Bsl, field="bsl_no", column_name="bsl_no", null=True, backref="licences"
     )
 
@@ -250,7 +250,7 @@ class ClassOfStation(BaseModel):
 class DeviceDetail(BaseModel):
     sdd_id = BigIntegerField(primary_key=True)  # SDD_ID
     # LICENCE_NO references Licence
-    licence_no = ForeignKeyField(
+    licence = ForeignKeyField(
         Licence,
         field="licence_no",
         column_name="licence_no",
@@ -358,7 +358,7 @@ class DeviceDetail(BaseModel):
 class AuthSpectrumFreq(BaseModel):
     # Using a surrogate primary key; composite keys can be set up via Meta.unique_together if needed.
     id = AutoField()
-    licence_no = ForeignKeyField(
+    licence = ForeignKeyField(
         Licence,
         field="licence_no",
         column_name="licence_no",
@@ -414,37 +414,3 @@ class AntennaPattern(BaseModel):
     angle_ref = FloatField(null=True)
     angle = FloatField(null=True)
     attenuation = FloatField(null=True)
-
-
-# (Optional) Create tables in the database
-if __name__ == "__main__":
-    db.connect()
-    db.create_tables(
-        [
-            Site,
-            Satellite,
-            ReportsTextBlock,
-            NatureOfService,
-            LicencingArea,
-            Licence,
-            LicenceSubservice,
-            LicenceStatus,
-            LicenceService,
-            IndustryCat,
-            FeeStatus,
-            DeviceDetail,
-            Client,
-            ClientType,
-            ClassOfStation,
-            Bsl,
-            BslArea,
-            AuthSpectrumFreq,
-            AuthSpectrumArea,
-            ApplicTextBlock,
-            Antenna,
-            AntennaPolarity,
-            AntennaPattern,
-            AccessArea,
-        ]
-    )
-    print("Tables created successfully.")
