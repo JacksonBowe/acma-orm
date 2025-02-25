@@ -93,3 +93,4 @@ Thumbs.db
 
 # Data Files
 tests/spectra_rrl
+*.db

@@ -1,25 +1,29 @@
-from datetime import date
+from __future__ import annotations
 
 from peewee import (
-    Model,
+    AutoField,
+    BigIntegerField,
     CharField,
     DateField,
+    FloatField,
     ForeignKeyField,
     IntegerField,
-    FloatField,
-    BigIntegerField,
-    AutoField,
-    SqliteDatabase,
+    Model,
     TextField,
 )
 
-# Initialize the SQLite database (filename can be configured later)
-db = SqliteDatabase("acma.db")
+from .database import db
 
 
 class BaseModel(Model):
     class Meta:
         database = db
+
+
+# 5. licencing_area.csv → LicencingArea
+class LicencingArea(BaseModel):
+    licensing_area_id = IntegerField(primary_key=True)  # LICENSING_AREA_ID
+    description = CharField(null=True)
 
 
 # 1. site.csv → Site
@@ -31,7 +35,7 @@ class Site(BaseModel):
     state = CharField(null=True)
     # LICENSING_AREA_ID references licencing_area.csv; see LicencingArea model below.
     licensing_area = ForeignKeyField(
-        "LicencingArea", field="licensing_area_id", null=True, backref="sites"
+        LicencingArea, field="licensing_area_id", null=True, backref="sites"
     )
     postcode = CharField(null=True)
     site_precision = CharField(null=True)
@@ -65,64 +69,10 @@ class NatureOfService(BaseModel):
     description = CharField(null=True)
 
 
-# 5. licencing_area.csv → LicencingArea
-class LicencingArea(BaseModel):
-    licensing_area_id = IntegerField(primary_key=True)  # LICENSING_AREA_ID
-    description = CharField(null=True)
-
-
 # 6. licence_status.csv → LicenceStatus
 class LicenceStatus(BaseModel):
     status = CharField(primary_key=True)  # STATUS
     status_text = CharField(null=True)
-
-
-# 7. licence.csv → Licence
-class Licence(BaseModel):
-    licence_no = CharField(primary_key=True)  # LICENCE_NO
-    # CLIENT_NO references client.csv (defined in Client below)
-    client = ForeignKeyField("Client", field="client_no", null=True, backref="licences")
-    # SV_ID references licence_service.csv (see LicenceService below)
-    sv_id = ForeignKeyField(
-        "LicenceService", field="sv_id", null=True, backref="licences"
-    )
-    # SS_ID references licence_subservice.csv (see LicenceSubservice below)
-    ss_id = ForeignKeyField(
-        "LicenceSubservice", field="ss_id", null=True, backref="licences"
-    )
-    licence_type_name = CharField(null=True)
-    licence_category_name = CharField(null=True)
-    date_issued = DateField(null=True)
-    date_of_effect = DateField(null=True)
-    date_of_expiry = DateField(null=True)
-    # STATUS and STATUS_TEXT might also be modeled as a foreign key to LicenceStatus
-    status = ForeignKeyField(
-        LicenceStatus, field="status", null=True, backref="licences"
-    )
-    status_text = ForeignKeyField(
-        LicenceStatus, field="status_text", null=True, backref="licences"
-    )
-    ap_id = CharField(null=True)
-    ap_prj_ident = CharField(null=True)
-    ship_name = CharField(null=True)
-    # BSL_NO references bsl.csv (see Bsl below)
-    bsl_no = ForeignKeyField("Bsl", field="bsl_no", null=True, backref="licences")
-
-
-# 8. licence_subservice.csv → LicenceSubservice
-class LicenceSubservice(BaseModel):
-    ss_id = IntegerField(primary_key=True)  # SS_ID
-    # SV_SV_ID references licence_service.csv
-    sv_sv_id = ForeignKeyField(
-        "LicenceService", field="sv_id", null=True, backref="subservices"
-    )
-    ss_name = CharField(null=True)
-
-
-# 9. licence_service.csv → LicenceService
-class LicenceService(BaseModel):
-    sv_id = IntegerField(primary_key=True)  # SV_ID
-    sv_name = CharField(null=True)
 
 
 # 10. industry_cat.csv → IndustryCat
@@ -136,6 +86,127 @@ class IndustryCat(BaseModel):
 class FeeStatus(BaseModel):
     fee_status_id = IntegerField(primary_key=True)  # FEE_STATUS_ID
     fee_status_text = CharField(null=True)
+
+
+# 14. client_type.csv → ClientType
+class ClientType(BaseModel):
+    type_id = IntegerField(primary_key=True)  # TYPE_ID
+    name = CharField(null=True)
+
+
+# 13. client.csv → Client
+class Client(BaseModel):
+    client_no = IntegerField(primary_key=True)  # CLIENT_NO
+    licencee = CharField(null=True)
+    trading_name = CharField(null=True)
+    acn = CharField(null=True)
+    abn = CharField(null=True)
+    postal_street = CharField(null=True)
+    postal_suburb = CharField(null=True)
+    postal_state = CharField(null=True)
+    postal_postcode = CharField(null=True)
+    # CAT_ID references IndustryCat
+    cat_id = ForeignKeyField(IndustryCat, field="cat_id", null=True, backref="clients")
+    # CLIENT_TYPE_ID references ClientType (see below)
+    client_type = ForeignKeyField(
+        ClientType, field="type_id", null=True, backref="clients"
+    )
+    # FEE_STATUS_ID references FeeStatus
+    fee_status_id = ForeignKeyField(
+        FeeStatus, field="fee_status_id", null=True, backref="clients"
+    )
+
+
+# 9. licence_service.csv → LicenceService
+class LicenceService(BaseModel):
+    sv_id = IntegerField(primary_key=True)  # SV_ID
+    sv_name = CharField(null=True)
+
+
+# 8. licence_subservice.csv → LicenceSubservice
+class LicenceSubservice(BaseModel):
+    ss_id = IntegerField(primary_key=True)  # SS_ID
+    # SV_SV_ID references licence_service.csv
+    sv_sv_id = ForeignKeyField(
+        LicenceService, field="sv_id", null=True, backref="subservices"
+    )
+    ss_name = CharField(null=True)
+
+
+# 17. bsl_area.csv → BslArea
+class BslArea(BaseModel):
+    area_code = CharField(primary_key=True)  # AREA_CODE
+    area_name = CharField(null=True)
+
+
+# 16. bsl.csv → Bsl
+class Bsl(BaseModel):
+    bsl_no = IntegerField(primary_key=True)  # BSL_NO
+    medium_category = CharField(null=True)
+    region_category = CharField(null=True)
+    community_interest = CharField(null=True)
+    bsl_state = CharField(null=True)
+    date_commenced = DateField(null=True)
+    on_air_id = CharField(null=True)
+    call_sign = CharField(null=True)
+    ibl_target_area = CharField(null=True)
+    # AREA_CODE might be linked to BslArea below
+    area_code = ForeignKeyField(
+        BslArea,
+        field="area_code",
+        column_name="area_code",
+        null=True,
+        backref="bsl_records",
+    )
+    reference = CharField(null=True)
+
+
+# 7. licence.csv → Licence
+class Licence(BaseModel):
+    licence_no = CharField(primary_key=True)  # LICENCE_NO
+    # CLIENT_NO references client.csv (defined in Client below)
+    client_no = ForeignKeyField(
+        Client,
+        field="client_no",
+        column_name="client_no",
+        null=True,
+        backref="licences",
+    )
+    # SV_ID references licence_service.csv (see LicenceService below)
+    sv_id = ForeignKeyField(
+        LicenceService, field="sv_id", null=True, backref="licences"
+    )
+    # SS_ID references licence_subservice.csv (see LicenceSubservice below)
+    ss_id = ForeignKeyField(
+        LicenceSubservice, field="ss_id", null=True, backref="licences"
+    )
+    licence_type_name = CharField(null=True)
+    licence_category_name = CharField(null=True)
+    date_issued = DateField(null=True)
+    date_of_effect = DateField(null=True)
+    date_of_expiry = DateField(null=True)
+    # STATUS and STATUS_TEXT might also be modeled as a foreign key to LicenceStatus
+    status = ForeignKeyField(
+        LicenceStatus,
+        field="status",
+        column_name="status",
+        null=True,
+        backref="licences",
+    )
+    status_text = ForeignKeyField(
+        LicenceStatus,
+        field="status_text",
+        column_name="status_text",
+        null=True,
+        backref="licences",
+    )
+    ap_id = CharField(null=True)
+    ap_prj_ident = CharField(null=True)
+    ship_name = CharField(null=True)
+    # BSL_NO references bsl.csv (see Bsl below)
+    bsl_no = ForeignKeyField(
+        Bsl, field="bsl_no", column_name="bsl_no", null=True, backref="licences"
+    )
 
 
 # 22. antenna_polarity.csv → AntennaPolarity
@@ -152,12 +223,39 @@ class AccessArea(BaseModel):
     area_category = CharField(null=True)
 
 
+# 21. antenna.csv → Antenna
+class Antenna(BaseModel):
+    antenna_id = IntegerField(primary_key=True)  # ANTENNA_ID
+    gain = FloatField(null=True)
+    front_to_back = FloatField(null=True)
+    h_beamwidth = FloatField(null=True)
+    v_beamwidth = FloatField(null=True)
+    band_min_freq = FloatField(null=True)
+    band_min_freq_unit = CharField(null=True)
+    band_max_freq = FloatField(null=True)
+    band_max_freq_unit = CharField(null=True)
+    antenna_size = FloatField(null=True)
+    antenna_type = CharField(null=True)
+    model = CharField(null=True)
+    manufacturer = CharField(null=True)
+
+
+# 15. class_of_station.csv → ClassOfStation
+class ClassOfStation(BaseModel):
+    code = CharField(primary_key=True)  # CODE
+    description = CharField(null=True)
+
+
 # 12. device_details.csv → DeviceDetail
 class DeviceDetail(BaseModel):
     sdd_id = BigIntegerField(primary_key=True)  # SDD_ID
     # LICENCE_NO references Licence
     licence_no = ForeignKeyField(
-        Licence, field="licence_no", null=True, backref="device_details"
+        Licence,
+        field="licence_no",
+        column_name="licence_no",
+        null=True,
+        backref="device_details",
     )
     device_registration_identifier = CharField(null=True)
     former_device_identifier = CharField(null=True)
@@ -176,10 +274,14 @@ class DeviceDetail(BaseModel):
     site = ForeignKeyField(Site, field="site_id", null=True, backref="device_details")
     # ANTENNA_ID references Antenna (defined below)
     antenna = ForeignKeyField(
-        "Antenna", field="antenna_id", null=True, backref="device_details"
+        Antenna, field="antenna_id", null=True, backref="device_details"
     )
     polarisation = ForeignKeyField(
-        AntennaPolarity, field="polarisation_code", null=True, backref="device_details"
+        AntennaPolarity,
+        field="polarisation_code",
+        column_name="polarisation",
+        null=True,
+        backref="device_details",
     )
     azimuth = FloatField(null=True)
     height = FloatField(null=True)
@@ -190,10 +292,18 @@ class DeviceDetail(BaseModel):
     eirp_unit = CharField(null=True)
     # SV_ID and SS_ID also reference LicenceService and LicenceSubservice respectively
     licence_service = ForeignKeyField(
-        LicenceService, field="sv_id", null=True, backref="device_details"
+        LicenceService,
+        field="sv_id",
+        column_name="sv_id",
+        null=True,
+        backref="device_details",
     )
     licence_subservice = ForeignKeyField(
-        LicenceSubservice, field="ss_id", null=True, backref="device_details"
+        LicenceSubservice,
+        field="ss_id",
+        column_name="ss_id",
+        null=True,
+        backref="device_details",
     )
     efl_id = CharField(null=True)
     efl_freq_ident = CharField(null=True)
@@ -209,7 +319,11 @@ class DeviceDetail(BaseModel):
     ap_id = CharField(null=True)
     # CLASS_OF_STATION_CODE references ClassOfStation (see below)
     class_of_station_code = ForeignKeyField(
-        "ClassOfStation", field="code", null=True, backref="device_details"
+        ClassOfStation,
+        field="code",
+        column_name="class_of_station_code",
+        null=True,
+        backref="device_details",
     )
     supplimental_flag = CharField(null=True)
     eq_freq_range_min = FloatField(null=True)
@@ -221,7 +335,11 @@ class DeviceDetail(BaseModel):
     hours_of_operation = CharField(null=True)
     # SA_ID references Satellite
     satellite = ForeignKeyField(
-        Satellite, field="sa_id", null=True, backref="device_details"
+        Satellite,
+        field="sa_id",
+        column_name="sa_id",
+        null=True,
+        backref="device_details",
     )
     related_efl_id = CharField(null=True)
     eqp_id = CharField(null=True)
@@ -236,71 +354,16 @@ class DeviceDetail(BaseModel):
     station_name = CharField(null=True)
 
 
-# 13. client.csv → Client
-class Client(BaseModel):
-    client_no = IntegerField(primary_key=True)  # CLIENT_NO
-    licencee = CharField(null=True)
-    trading_name = CharField(null=True)
-    acn = CharField(null=True)
-    abn = CharField(null=True)
-    postal_street = CharField(null=True)
-    postal_suburb = CharField(null=True)
-    postal_state = CharField(null=True)
-    postal_postcode = CharField(null=True)
-    # CAT_ID references IndustryCat
-    industry_cat = ForeignKeyField(
-        IndustryCat, field="cat_id", null=True, backref="clients"
-    )
-    # CLIENT_TYPE_ID references ClientType (see below)
-    client_type = ForeignKeyField(
-        "ClientType", field="type_id", null=True, backref="clients"
-    )
-    # FEE_STATUS_ID references FeeStatus
-    fee_status = ForeignKeyField(
-        FeeStatus, field="fee_status_id", null=True, backref="clients"
-    )
-
-
-# 14. client_type.csv → ClientType
-class ClientType(BaseModel):
-    type_id = IntegerField(primary_key=True)  # TYPE_ID
-    name = CharField(null=True)
-
-
-# 15. class_of_station.csv → ClassOfStation
-class ClassOfStation(BaseModel):
-    code = CharField(primary_key=True)  # CODE
-    description = CharField(null=True)
-
-
-# 16. bsl.csv → Bsl
-class Bsl(BaseModel):
-    bsl_no = IntegerField(primary_key=True)  # BSL_NO
-    medium_category = CharField(null=True)
-    region_category = CharField(null=True)
-    community_interest = CharField(null=True)
-    bsl_state = CharField(null=True)
-    date_commenced = DateField(null=True)
-    on_air_id = CharField(null=True)
-    call_sign = CharField(null=True)
-    ibl_target_area = CharField(null=True)
-    # AREA_CODE might be linked to BslArea below
-    area_code = CharField(null=True)
-    reference = CharField(null=True)
-
-
-# 17. bsl_area.csv → BslArea
-class BslArea(BaseModel):
-    area_code = CharField(primary_key=True)  # AREA_CODE
-    area_name = CharField(null=True)
-
-
 # 18. auth_spectrum_freq.csv → AuthSpectrumFreq
 class AuthSpectrumFreq(BaseModel):
     # Using a surrogate primary key; composite keys can be set up via Meta.unique_together if needed.
     id = AutoField()
-    licence = ForeignKeyField(
-        Licence, field="licence_no", null=True, backref="auth_spectrum_freqs"
+    licence_no = ForeignKeyField(
+        Licence,
+        field="licence_no",
+        column_name="licence_no",
+        null=True,
+        backref="auth_spectrum_freqs",
     )
     area_code = CharField(null=True)
     area_name = CharField(null=True)
@@ -313,8 +376,12 @@ class AuthSpectrumFreq(BaseModel):
 # 19. auth_spectrum_area.csv → AuthSpectrumArea
 class AuthSpectrumArea(BaseModel):
     id = AutoField()
-    licence = ForeignKeyField(
-        Licence, field="licence_no", null=True, backref="auth_spectrum_areas"
+    licence_no = ForeignKeyField(
+        Licence,
+        field="licence_no",
+        column_name="licence_no",
+        null=True,
+        backref="auth_spectrum_areas",
     )
     area_code = CharField(null=True)
     area_name = CharField(null=True)
@@ -326,30 +393,17 @@ class ApplicTextBlock(BaseModel):
     aptb_id = BigIntegerField(primary_key=True)  # APTB_ID
     aptb_table_prefix = CharField(null=True)
     aptb_table_id = CharField(null=True)
-    licence = ForeignKeyField(
-        Licence, field="licence_no", null=True, backref="applic_text_blocks"
+    licence_no = ForeignKeyField(
+        Licence,
+        field="licence_no",
+        column_name="licence_no",
+        null=True,
+        backref="applic_text_blocks",
     )
     aptb_description = CharField(null=True)
     aptb_category = CharField(null=True)
     aptb_text = TextField(null=True)
     aptb_item = CharField(null=True)
-
-
-# 21. antenna.csv → Antenna
-class Antenna(BaseModel):
-    antenna_id = IntegerField(primary_key=True)  # ANTENNA_ID
-    gain = FloatField(null=True)
-    front_to_back = FloatField(null=True)
-    h_beamwidth = FloatField(null=True)
-    v_beamwidth = FloatField(null=True)
-    band_min_freq = FloatField(null=True)
-    band_min_freq_unit = CharField(null=True)
-    band_max_freq = FloatField(null=True)
-    band_max_freq_unit = CharField(null=True)
-    antenna_size = FloatField(null=True)
-    antenna_type = CharField(null=True)
-    model = CharField(null=True)
-    manufacturer = CharField(null=True)
 
 
 # 23. antenna_pattern.csv → AntennaPattern
