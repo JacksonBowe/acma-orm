@@ -71,7 +71,13 @@ class LicencingArea(BaseModel):
     description = CharField(null=True)
 
 
-# 6. licence.csv → Licence
+# 6. licence_status.csv → LicenceStatus
+class LicenceStatus(BaseModel):
+    status = CharField(primary_key=True)  # STATUS
+    status_text = CharField(null=True)
+
+
+# 7. licence.csv → Licence
 class Licence(BaseModel):
     licence_no = CharField(primary_key=True)  # LICENCE_NO
     # CLIENT_NO references client.csv (defined in Client below)
@@ -90,8 +96,12 @@ class Licence(BaseModel):
     date_of_effect = DateField(null=True)
     date_of_expiry = DateField(null=True)
     # STATUS and STATUS_TEXT might also be modeled as a foreign key to LicenceStatus
-    status = CharField(null=True)
-    status_text = CharField(null=True)
+    status = ForeignKeyField(
+        LicenceStatus, field="status", null=True, backref="licences"
+    )
+    status_text = ForeignKeyField(
+        LicenceStatus, field="status_text", null=True, backref="licences"
+    )
     ap_id = CharField(null=True)
     ap_prj_ident = CharField(null=True)
     ship_name = CharField(null=True)
@@ -99,7 +109,7 @@ class Licence(BaseModel):
     bsl_no = ForeignKeyField("Bsl", field="bsl_no", null=True, backref="licences")
 
 
-# 7. licence_subservice.csv → LicenceSubservice
+# 8. licence_subservice.csv → LicenceSubservice
 class LicenceSubservice(BaseModel):
     ss_id = IntegerField(primary_key=True)  # SS_ID
     # SV_SV_ID references licence_service.csv
@@ -107,12 +117,6 @@ class LicenceSubservice(BaseModel):
         "LicenceService", field="sv_id", null=True, backref="subservices"
     )
     ss_name = CharField(null=True)
-
-
-# 8. licence_status.csv → LicenceStatus
-class LicenceStatus(BaseModel):
-    status = CharField(primary_key=True)  # STATUS
-    status_text = CharField(null=True)
 
 
 # 9. licence_service.csv → LicenceService
@@ -134,11 +138,25 @@ class FeeStatus(BaseModel):
     fee_status_text = CharField(null=True)
 
 
+# 22. antenna_polarity.csv → AntennaPolarity
+class AntennaPolarity(BaseModel):
+    polarisation_code = CharField(primary_key=True)  # POLARISATION_CODE
+    polarisation_text = CharField(null=True)
+
+
+# 24. access_area.csv → AccessArea
+class AccessArea(BaseModel):
+    area_id = IntegerField(primary_key=True)  # AREA_ID
+    area_code = CharField(null=True)
+    area_name = CharField(null=True)
+    area_category = CharField(null=True)
+
+
 # 12. device_details.csv → DeviceDetail
 class DeviceDetail(BaseModel):
     sdd_id = BigIntegerField(primary_key=True)  # SDD_ID
     # LICENCE_NO references Licence
-    licence = ForeignKeyField(
+    licence_no = ForeignKeyField(
         Licence, field="licence_no", null=True, backref="device_details"
     )
     device_registration_identifier = CharField(null=True)
@@ -160,7 +178,9 @@ class DeviceDetail(BaseModel):
     antenna = ForeignKeyField(
         "Antenna", field="antenna_id", null=True, backref="device_details"
     )
-    polarisation = CharField(null=True)
+    polarisation = ForeignKeyField(
+        AntennaPolarity, field="polarisation_code", null=True, backref="device_details"
+    )
     azimuth = FloatField(null=True)
     height = FloatField(null=True)
     tilt = FloatField(null=True)
@@ -181,7 +201,9 @@ class DeviceDetail(BaseModel):
     leqd_mode = CharField(null=True)
     receiver_threshold = FloatField(null=True)
     # AREA_AREA_ID is left as an IntegerField; it could be linked to AccessArea if desired.
-    area_area_id = IntegerField(null=True)
+    area_area_id = ForeignKeyField(
+        AccessArea, field="area_id", null=True, backref="device_details"
+    )
     call_sign = CharField(null=True)
     area_description = CharField(null=True)
     ap_id = CharField(null=True)
@@ -330,12 +352,6 @@ class Antenna(BaseModel):
     manufacturer = CharField(null=True)
 
 
-# 22. antenna_polarity.csv → AntennaPolarity
-class AntennaPolarity(BaseModel):
-    polarisation_code = CharField(primary_key=True)  # POLARISATION_CODE
-    polarisation_text = CharField(null=True)
-
-
 # 23. antenna_pattern.csv → AntennaPattern
 class AntennaPattern(BaseModel):
     id = AutoField()
@@ -344,14 +360,6 @@ class AntennaPattern(BaseModel):
     angle_ref = FloatField(null=True)
     angle = FloatField(null=True)
     attenuation = FloatField(null=True)
-
-
-# 24. access_area.csv → AccessArea
-class AccessArea(BaseModel):
-    area_id = IntegerField(primary_key=True)  # AREA_ID
-    area_code = CharField(null=True)
-    area_name = CharField(null=True)
-    area_category = CharField(null=True)
 
 
 # (Optional) Create tables in the database
