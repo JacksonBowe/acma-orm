@@ -13,7 +13,7 @@ def main():
     site_count = Site.select().count()
     print(f"Total number of Site records: {site_count}")
 
-    import_all_data("./tests/spectra_rrl")
+    import_all_data("./examples/spectra_rrl")
 
     # Close the database connection.
     close_db()

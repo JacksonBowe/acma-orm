@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Self
 
 from peewee import (
     AutoField,
@@ -18,6 +19,22 @@ from .database import db
 class BaseModel(Model):
     class Meta:
         database = db
+
+    @classmethod
+    def get_or_none(cls, *args, **kwargs) -> Self | None:
+        return super().get_or_none(*args, **kwargs)
+
+    @classmethod
+    def get_by_id(cls, pk: int) -> Self:
+        return super().get_by_id(pk)
+
+    @classmethod
+    def get(cls, *query, **filters) -> Self:
+        return super().get(*query, **filters)
+
+    @classmethod
+    def get_or_create(cls, **kwargs) -> tuple[Self, bool]:
+        return super().get_or_create(**kwargs)
 
 
 # 5. licencing_area.csv → LicencingArea

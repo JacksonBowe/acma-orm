@@ -1,3 +1,5 @@
+from typing import List
+
 from acma_orm.database import initialize, close_db
 from acma_orm.models import Site, Client, Licence
 from acma_orm.importer import import_all_data
@@ -11,14 +13,12 @@ def main():
     site_count = Site.select().count()
     print(f"Total number of Site records: {site_count}")
 
-    query = (
-        Licence.select(Licence.licence_no)
-        .join(Client)
-        .where(Client.licencee == "TELSTRA LIMITED")
+    query: List[Licence] = (
+        Licence.select().join(Client).where(Client.client_no == 20053843)
     )
 
     for licence in query:
-        print(licence.licence_no)
+        print(licence)
 
     # Close the database connection.
     close_db()
