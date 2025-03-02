@@ -95,4 +95,5 @@ Thumbs.db
 examples/spectra_rrl/*.csv
 examples/spectra_rrl/*.txt
 examples/spectra_rrl/*.pdf
+examples/spectra_rrl/DOC
 *.db
