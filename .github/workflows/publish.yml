@@ -23,6 +23,9 @@ jobs:
               with:
                   python-version-file: "pyproject.toml"
 
+            - name: Build project
+              run: uv build
+
             - name: Publish package to PyPI with UV
               run: uv publish
 
