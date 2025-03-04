@@ -1,4 +1,4 @@
-name: Publish Package to PyPI
+name: Build, Publish, and Release
 
 on:
     push:
@@ -6,75 +6,38 @@ on:
             - "v*.*.*" # Trigger on version tags, e.g. v1.0.0
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-
-            - name: Install uv
-              uses: astral-sh/setup-uv@v5
-              with:
-                  # Install a specific version of uv.
-                  version: "0.6.4"
-
-            - name: Set up Python
-              uses: actions/setup-python@v5
-              with:
-                  python-version-file: "pyproject.toml"
-
-            - name: Build project
-              run: uv build
-
-            - name: Upload Build Artifacts
-              uses: actions/upload-artifact@v4
-              with:
-                  name: dist
-                  path: dist/ # Adjust if your build output is in a different directory
-
     publish:
-        needs: build
         runs-on: ubuntu-latest
         permissions:
-            contents: read
+            contents: write
             id-token: write
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
 
-            - name: Download Build Artifacts
-              uses: actions/download-artifact@v4
-              with:
-                  name: dist
-
             - name: Install uv
               uses: astral-sh/setup-uv@v5
               with:
                   version: "0.6.4"
 
-            - name: Publish to PyPi with UV
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.9"
+
+            - name: Build package with UV
+              run: uv build
+
+            - name: Publish package to PyPI with UV
               run: uv publish
 
-    release:
-        needs: build
-        runs-on: ubuntu-latest
-        permissions:
-            contents: write
-
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-
-            - name: Download Build Artifacts
-              uses: actions/download-artifact@v4
-              with:
-                  name: dist
-
-            - name: Create Github Release
+            - name: Create GitHub Release
               id: create_release
               uses: actions/create-release@v1
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
                   tag_name: ${{ github.ref }}
-                  release_name: ${{ github.ref }}
+                  release_name: Release ${{ github.ref }}
+                  draft: false
+                  prerelease: false
