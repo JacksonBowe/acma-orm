@@ -6,7 +6,7 @@ on:
             - "v*.*.*" # Trigger on version tags, e.g. v1.0.0
 
 jobs:
-    publish:
+    build:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout code
@@ -25,10 +25,16 @@ jobs:
 
             - name: Build project
               run: uv build
-
-            - name: Publish package to PyPI with UV
+    publish:
+        runs-on: ubuntu-latest
+        permissions:
+            id-token: write
+        steps:
+            - name: Publish to PyPi with UV
               run: uv publish
-
+    release:
+        runs-on: ubuntu-latest
+        steps:
             - name: Create Github Release
               id: create_release
               uses: actions/create-release@v1
