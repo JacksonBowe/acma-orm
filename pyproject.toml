@@ -1,6 +1,6 @@
 [project]
 name = "acma-orm"
-version = "0.1.2"
+version = "0.1.8"
 description = "Add your description here"
 readme = "README.md"
 authors = [{ name = "JacksonBowe", email = "jackson.bowe@powertec.com.au" }]
