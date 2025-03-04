@@ -1,7 +1,7 @@
 [project]
 name = "acma-orm"
-version = "0.1.9"
-description = "Add your description here"
+version = "0.1.10"
+description = "A Python ORM of the ACMA database"
 readme = "README.md"
 authors = [{ name = "JacksonBowe", email = "jackson.bowe@powertec.com.au" }]
 requires-python = ">=3.12"
