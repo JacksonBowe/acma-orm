@@ -27,7 +27,7 @@ jobs:
               run: uv build
 
             - name: Upload Build Artifacts
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: dist
                   path: dist/ # Adjust if your build output is in a different directory
@@ -42,7 +42,7 @@ jobs:
               uses: actions/checkout@v4
 
             - name: Download Build Artifacts
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4
               with:
                   name: dist
 
@@ -60,6 +60,11 @@ jobs:
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
+
+            - name: Download Build Artifacts
+              uses: actions/download-artifact@v4
+              with:
+                  name: dist
 
             - name: Create Github Release
               id: create_release
