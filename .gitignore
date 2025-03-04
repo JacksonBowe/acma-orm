@@ -97,3 +97,4 @@ examples/spectra_rrl/*.txt
 examples/spectra_rrl/*.pdf
 examples/spectra_rrl/DOC
 *.db
+*.db-journal

@@ -53,3 +53,4 @@ def close_db():
     """Close the database connection if open."""
     if not db.is_closed():
         db.close()
+        print("Database closed.")
