@@ -1,9 +1,9 @@
 [project]
 name = "acma-orm"
-version = "0.1.11"
+version = "0.1.12"
 description = "A Python ORM of the ACMA database"
 readme = "README.md"
-authors = [{ name = "JacksonBowe", email = "jackson.bowe@powertec.com.au" }]
+authors = [{ name = "JacksonBowe", email = "jacksonbowe98@gmail.com" }]
 requires-python = ">=3.12"
 dependencies = ["pandas>=2.2.3", "peewee>=3.17.9"]
 

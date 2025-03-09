@@ -9,7 +9,7 @@ query = (
     .join(DeviceDetail, on=(Licence.licence_no == DeviceDetail.licence))
     .join(Client, on=(Licence.client == Client.client_no))
     .where(DeviceDetail.frequency.between(2550000000, 2650000000))
-    .group_by(Licence.licence_no)
+    .distinct()
 )
 
 for row in query.dicts():

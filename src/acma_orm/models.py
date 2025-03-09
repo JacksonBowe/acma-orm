@@ -254,7 +254,7 @@ class DeviceDetail(BaseModel):
     bandwidth = BigIntegerField(null=True)
     carrier_freq = BigIntegerField(null=True)
     emission = CharField(null=True)
-    device_type = CharField(null=True)
+    device_type = CharField(null=True)  # 'T' == Transmitter, 'R' == Receiver
     transmitter_power = FloatField(null=True)
     transmitter_power_unit = CharField(null=True)
     site = ForeignKeyField(Site, field="site_id", null=True, backref="device_details")
