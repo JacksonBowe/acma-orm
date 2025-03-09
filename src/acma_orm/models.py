@@ -37,7 +37,7 @@ class BaseModel(Model):
         return super().get_or_create(**kwargs)
 
 
-class LicencingArea(BaseModel):
+class LicensingArea(BaseModel):
     licensing_area_id = IntegerField(primary_key=True)  # LICENSING_AREA_ID
     description = CharField(null=True)
 
@@ -49,7 +49,7 @@ class Site(BaseModel):
     name = CharField(null=True)
     state = CharField(null=True)
     licensing_area = ForeignKeyField(
-        LicencingArea, field="licensing_area_id", null=True, backref="sites"
+        LicensingArea, field="licensing_area_id", null=True, backref="sites"
     )
     postcode = CharField(null=True)
     site_precision = CharField(null=True)
@@ -198,6 +198,7 @@ class Licence(BaseModel):
     bsl = ForeignKeyField(
         Bsl, field="bsl_no", column_name="bsl_no", null=True, backref="licences"
     )
+    awl_type = CharField(null=True)
 
 
 class AntennaPolarity(BaseModel):

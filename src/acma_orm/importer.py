@@ -51,7 +51,7 @@ def import_all_data(data_dir, db_filename="acma.db"):
 
     # Import tables in the required order (adjust table names to your schema):
     # Lookup Tables
-    import_table(conn, data_dir, "licencing_area.csv", "licencingarea")
+    import_table(conn, data_dir, "licensing_area.csv", "licensingarea")
     import_table(conn, data_dir, "satellite.csv", "satellite")
     import_table(conn, data_dir, "reports_text_block.csv", "reportstextblock")
     import_table(conn, data_dir, "nature_of_service.csv", "natureofservice")

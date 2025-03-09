@@ -25,7 +25,7 @@ def initialize(db_filename="acma.db"):
         models.Satellite,
         models.ReportsTextBlock,
         models.NatureOfService,
-        models.LicencingArea,
+        models.LicensingArea,
         models.LicenceStatus,
         models.LicenceSubservice,
         models.LicenceService,
