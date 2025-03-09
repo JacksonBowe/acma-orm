@@ -3,7 +3,7 @@ requires-python = ">=3.12"
 
 [[package]]
 name = "acma-orm"
-version = "0.1.0"
+version = "0.1.11"
 source = { editable = "." }
 dependencies = [
     { name = "pandas" },
